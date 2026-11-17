@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 /** Cliente com a sessão do usuário (cookies). Use em rotas/ações que dependem de quem está logado. */
 export async function createServerSupabase() {
   const store = await cookies();
-  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  return createServerClient((process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim().replace(/^["']|["']$/g, ''), process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     cookies: {
       getAll: () => store.getAll(),
       setAll: (list: { name: string; value: string; options: CookieOptions }[]) => {
@@ -21,14 +21,14 @@ export async function createServerSupabase() {
 
 /** Cliente anônimo, sem cookies: para dados públicos da vitrine (permite cache). */
 export function createPublicClient() {
-  return createSbClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  return createSbClient((process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim().replace(/^["']|["']$/g, ''), process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
 
 /** Cliente com poder total. SOMENTE no servidor (webhooks). Nunca importe em componentes de cliente. */
 export function createServiceClient() {
-  return createSbClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+  return createSbClient((process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim().replace(/^["']|["']$/g, ''), process.env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }

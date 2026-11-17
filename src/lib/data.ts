@@ -6,7 +6,15 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3
 
 export { DEFAULT_SETTINGS };
 
-const configured = () => !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const configured = () => {
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
+  if (!url || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return false;
+  try {
+    return /^https?:$/.test(new URL(url).protocol);
+  } catch {
+    return false;
+  }
+};
 
 export async function getSettings(): Promise<StoreSettings> {
   if (!configured()) return DEFAULT_SETTINGS;

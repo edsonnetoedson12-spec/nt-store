@@ -4,7 +4,13 @@ import { getCategories, listProducts, SITE_URL } from '@/lib/data';
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [products, cats] = await Promise.all([listProducts({}), getCategories()]);
+  let products: Awaited<ReturnType<typeof listProducts>> = [];
+  let cats: Awaited<ReturnType<typeof getCategories>> = [];
+  try {
+    [products, cats] = await Promise.all([listProducts({}), getCategories()]);
+  } catch {
+    /* sem banco configurado: sitemap só com as páginas fixas */
+  }
   return [
     { url: SITE_URL, changeFrequency: 'daily', priority: 1 },
     { url: `${SITE_URL}/loja`, changeFrequency: 'daily', priority: 0.9 },
