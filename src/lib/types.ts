@@ -92,4 +92,5 @@ export type StoreSettings = {
   shipping: { flat: number; free_above: number; pickup: boolean };
   payments: { pix: boolean; cartao: boolean; whatsapp: boolean };
   about: string;
+  theme: { mode: 'claro' | 'escuro'; accent: string };
 };

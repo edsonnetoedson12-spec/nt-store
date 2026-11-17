@@ -19,7 +19,7 @@ export default function SettingsAdmin() {
       const merged: StoreSettings = {
         ...DEFAULT_SETTINGS, ...v,
         hero: { ...DEFAULT_SETTINGS.hero, ...v.hero }, sections: { ...DEFAULT_SETTINGS.sections, ...v.sections },
-        shipping: { ...DEFAULT_SETTINGS.shipping, ...v.shipping }, payments: { ...DEFAULT_SETTINGS.payments, ...v.payments },
+        shipping: { ...DEFAULT_SETTINGS.shipping, ...v.shipping }, payments: { ...DEFAULT_SETTINGS.payments, ...v.payments }, theme: { ...DEFAULT_SETTINGS.theme, ...v.theme },
       };
       setS(merged); setFlat(String(merged.shipping.flat)); setFree(String(merged.shipping.free_above));
     });
@@ -59,6 +59,30 @@ export default function SettingsAdmin() {
         <button className="btn btn-dark sm" disabled={busy}>{busy ? 'Aguarde…' : 'Salvar tudo'}</button>
       </div>
       {msg && <p className={msg.ok ? 'ok' : 'err'} role="status">{msg.t}</p>}
+
+      <fieldset className="box">
+        <legend>Aparência (cores do site)</legend>
+        <div>
+          <span className="lbl">Cor de destaque (botões, preços e detalhes)</span>
+          <div className="swatches">
+            {[['#b08d57', 'Dourado'], ['#2563eb', 'Azul'], ['#7c3aed', 'Roxo'], ['#059669', 'Verde'], ['#dc2626', 'Vermelho'], ['#db2777', 'Rosa'], ['#ea580c', 'Laranja'], ['#0f172a', 'Preto']].map(([c, n]) => (
+              <button type="button" key={c} title={n} aria-label={n} className={s.theme.accent.toLowerCase() === c ? 'sw on' : 'sw'} style={{ background: c }} onClick={() => up('theme', { ...s.theme, accent: c })} />
+            ))}
+            <label className="sw-custom">Outra cor<input type="color" value={s.theme.accent} onChange={(e) => up('theme', { ...s.theme, accent: e.target.value })} /></label>
+          </div>
+        </div>
+        <div>
+          <span className="lbl">Modo</span>
+          <div className="checks">
+            <label><input type="radio" name="mode" checked={s.theme.mode === 'claro'} onChange={() => up('theme', { ...s.theme, mode: 'claro' })} /> Claro</label>
+            <label><input type="radio" name="mode" checked={s.theme.mode === 'escuro'} onChange={() => up('theme', { ...s.theme, mode: 'escuro' })} /> Escuro</label>
+          </div>
+        </div>
+        <div className="theme-prev" data-mode={s.theme.mode} style={{ ['--gold' as string]: s.theme.accent }}>
+          <strong>Pré-visualização</strong><span>R$ 59,90</span><em>Comprar</em>
+        </div>
+        <small className="muted">Clique em “Salvar tudo” para aplicar no site.</small>
+      </fieldset>
 
       <fieldset className="box">
         <legend>Marca e empresa</legend>

@@ -28,6 +28,7 @@ export async function getSettings(): Promise<StoreSettings> {
       sections: { ...DEFAULT_SETTINGS.sections, ...v.sections },
       shipping: { ...DEFAULT_SETTINGS.shipping, ...v.shipping },
       payments: { ...DEFAULT_SETTINGS.payments, ...v.payments },
+      theme: { ...DEFAULT_SETTINGS.theme, ...v.theme },
     };
   } catch {
     return DEFAULT_SETTINGS;
