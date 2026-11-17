@@ -101,7 +101,7 @@ export default function ProductsAdmin() {
           <tbody>
             {shown.map((p) => (
               <tr key={p.id}>
-                <td><img className="thumb" src={p.images[0] || '/placeholders/ring.svg'} alt="" /></td>
+                <td><img className="thumb" src={p.images[0] || '/placeholders/produto.svg'} alt="" /></td>
                 <td><strong>{p.name}</strong><br /><small className="muted">/{p.slug}</small></td>
                 <td>{catName(p.category_id)}</td>
                 <td className="r">{p.promo_price != null ? <><s className="muted">{brl(p.price)}</s><br /><strong>{brl(p.promo_price)}</strong></> : brl(p.price)}</td>

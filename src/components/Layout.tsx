@@ -91,7 +91,7 @@ export function ProductCard({ p, catName }: { p: Product; catName?: string }) {
   return (
     <article className="card">
       <Link href={`/produto/${p.slug}`} className="card-img">
-        <img src={p.images[0] || '/placeholders/ring.svg'} alt={p.name} loading="lazy" />
+        <img src={p.images[0] || '/placeholders/produto.svg'} alt={p.name} loading="lazy" />
         <div className="tags">
           {promo && <span className="tag tag-red">-{discountPercent(p)}%</span>}
           {p.is_new && <span className="tag">Novo</span>}

@@ -113,7 +113,7 @@ export function AddToCart({ product, big = false }: { product: Product; big?: bo
 
 export function ProductGallery({ images, alt }: { images: string[]; alt: string }) {
   const [i, setI] = useState(0);
-  const list = images.length ? images : ['/placeholders/ring.svg'];
+  const list = images.length ? images : ['/placeholders/produto.svg'];
   return (
     <div className="gallery">
       <div className="gallery-main">

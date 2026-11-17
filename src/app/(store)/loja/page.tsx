@@ -9,7 +9,7 @@ const num = (v: string) => (v !== '' && Number.isFinite(Number(v.replace(',', '.
 
 export const metadata: Metadata = {
   title: 'Loja de acessórios',
-  description: 'Brincos, colares, anéis, pulseiras, relógios, óculos e bolsas com acabamento premium.',
+  description: 'Capas, películas, carregadores, cabos, fones de ouvido e outros acessórios para celular com qualidade e preço justo.',
   alternates: { canonical: '/loja' },
 };
 

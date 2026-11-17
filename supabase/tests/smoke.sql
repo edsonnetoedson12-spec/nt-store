@@ -9,9 +9,9 @@ declare
   r jsonb; n int; ok boolean;
   payload jsonb;
 begin
-  select * into p from public.products where slug = 'brincos-aurora';
+  select * into p from public.products where slug = 'capa-silicone-premium';
   s0 := p.stock; sold0 := p.sold_count;
-  assert p.id is not null, 'seed: produto brincos-aurora não encontrado (rode seed.sql)';
+  assert p.id is not null, 'seed: produto capa-silicone-premium não encontrado (rode seed.sql)';
 
   -- 1) pedido válido com cupom de 10% e frete cobrado (abaixo do frete grátis)
   payload := jsonb_build_object(
@@ -26,7 +26,7 @@ begin
   assert (r->>'total')::numeric = round(p.price*2*0.90,2) + 19.90, 'total incorreto';
 
   -- 2) estoque baixou e vendas contadas; cliente criado só com dígitos
-  select * into p from public.products where slug = 'brincos-aurora';
+  select * into p from public.products where slug = 'capa-silicone-premium';
   assert p.stock = s0 - 2, 'estoque não baixou';
   assert p.sold_count = sold0 + 2, 'sold_count não subiu';
   assert exists (select 1 from public.customers where phone = '85988887777'), 'cliente não cadastrado';
@@ -66,7 +66,7 @@ begin
   update public.orders set status = 'cancelado'
    where created_at = now()   -- só os pedidos criados neste teste (mesma transação)
      and id in (select order_id from public.order_items where product_id = p.id) and status <> 'cancelado';
-  select * into p from public.products where slug = 'brincos-aurora';
+  select * into p from public.products where slug = 'capa-silicone-premium';
   assert p.stock = s0, 'cancelamento não devolveu o estoque (esperado ' || s0 || ', atual ' || p.stock || ')';
 
   -- 7) visitante anônimo não enxerga pedidos, clientes nem cupons, mas vê produtos

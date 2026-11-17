@@ -48,7 +48,7 @@ export default function CartView({ shipping }: { shipping: ShippingRule }) {
         <div className="cart-list">
           {items.map((i) => (
             <div className="cart-row" key={i.id}>
-              <img src={i.image || '/placeholders/ring.svg'} alt={i.name} />
+              <img src={i.image || '/placeholders/produto.svg'} alt={i.name} />
               <div className="cart-info">
                 <Link href={`/produto/${i.slug}`}>{i.name}</Link>
                 <span className="muted">{brl(i.price)} cada</span>

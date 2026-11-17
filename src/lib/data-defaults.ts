@@ -2,7 +2,7 @@ import type { StoreSettings } from './types';
 
 export const DEFAULT_SETTINGS: StoreSettings = {
   name: 'NT',
-  tagline: 'Acessórios que contam a sua história',
+  tagline: 'Acessórios para celular com qualidade e preço justo',
   logo_url: '',
   whatsapp: '',
   email: '',
@@ -12,7 +12,7 @@ export const DEFAULT_SETTINGS: StoreSettings = {
   facebook: '',
   tiktok: '',
   phrases: [],
-  hero: { title: 'Acessórios para brilhar todos os dias', subtitle: 'Design sofisticado e qualidade premium.', cta: 'Ver coleção' },
+  hero: { title: 'Tudo para o seu celular em um só lugar', subtitle: 'Capas, películas, carregadores e muito mais.', cta: 'Ver produtos' },
   banners: [],
   sections: { bestsellers: 'Mais vendidos', news: 'Novidades', promo: 'Promoções', categories: 'Compre por categoria', testimonials: 'O que dizem nossas clientes' },
   shipping: { flat: 0, free_above: 0, pickup: true },
