@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getCategories, listProducts, type ProductQuery } from '@/lib/data';
 import { ProductCard } from '@/components/Layout';
+import { ShopFilters } from '@/components/StoreBits';
 
 type SP = Promise<Record<string, string | string[] | undefined>>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || '';
@@ -45,6 +46,7 @@ export default async function Shop({ searchParams }: { searchParams: SP }) {
       <h1 className="page-title">{q ? `Resultados para “${q}”` : title}</h1>
       <div className="shop-layout">
         <aside className="filters">
+          <ShopFilters>
           <form method="get" action="/loja">
             <label>
               Buscar
@@ -89,6 +91,7 @@ export default async function Shop({ searchParams }: { searchParams: SP }) {
               Limpar
             </Link>
           </form>
+          </ShopFilters>
           <div className="chips">
             <Link className={!categoria ? 'chip on' : 'chip'} href={keep({ categoria: '' })}>
               Todas
