@@ -268,3 +268,12 @@ html, body { overflow-x: hidden; -webkit-text-size-adjust: 100%; }
 
 .cell-stack { display: grid; gap: 2px; }
 @media (max-width: 800px) { .cards .cell-stack { justify-items: end; text-align: right; } .cards td .cell-stack small { word-break: break-all; } }
+
+/* Menu do celular: tela cheia, com fundo sólido */
+.drawer { background: var(--bg); color: var(--ink); overflow-y: auto; height: 100vh; height: 100dvh; z-index: 200; }
+.drawer-close { color: var(--ink); width: 48px; height: 48px; line-height: 1; }
+.drawer nav a { color: var(--ink); }
+@media (max-width: 800px) {
+  /* backdrop-filter faz o menu (position: fixed) ficar preso ao cabeçalho */
+  .header { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--bg); }
+}
