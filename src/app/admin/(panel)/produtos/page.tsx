@@ -1,4 +1,5 @@
 'use client';
+import ResponsiveTable from '@/components/ResponsiveTable';
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { num, refreshStore, uploadImage } from '@/lib/admin';
@@ -95,16 +96,16 @@ export default function ProductsAdmin() {
       </div>
       {msg && <p className={msg.ok ? 'ok' : 'err'} role="status">{msg.t}</p>}
 
-      <div className="table-wrap">
+      <ResponsiveTable>
         <table>
           <thead><tr><th></th><th>Produto</th><th>Categoria</th><th className="r">Preço</th><th className="r">Custo</th><th className="r">Estoque</th><th>Status</th><th></th></tr></thead>
           <tbody>
             {shown.map((p) => (
               <tr key={p.id}>
                 <td><img className="thumb" src={p.images[0] || '/placeholders/produto.svg'} alt="" /></td>
-                <td><strong>{p.name}</strong><br /><small className="muted">/{p.slug}</small></td>
+                <td><div className="cell-stack"><strong>{p.name}</strong><small className="muted">/{p.slug}</small></div></td>
                 <td>{catName(p.category_id)}</td>
-                <td className="r">{p.promo_price != null ? <><s className="muted">{brl(p.price)}</s><br /><strong>{brl(p.promo_price)}</strong></> : brl(p.price)}</td>
+                <td className="r">{p.promo_price != null ? <div className="cell-stack"><s className="muted">{brl(p.price)}</s><strong>{brl(p.promo_price)}</strong></div> : brl(p.price)}</td>
                 <td className="r">{brl(p.cost)}</td>
                 <td className="r">
                   <span className="stock">
@@ -127,7 +128,7 @@ export default function ProductsAdmin() {
             {shown.length === 0 && <tr><td colSpan={8} className="muted">Nenhum produto.</td></tr>}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
 
       {form && (
         <div className="modal" role="dialog" aria-modal="true">

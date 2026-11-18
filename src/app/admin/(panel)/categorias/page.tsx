@@ -1,4 +1,5 @@
 'use client';
+import ResponsiveTable from '@/components/ResponsiveTable';
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { refreshStore } from '@/lib/admin';
@@ -52,7 +53,7 @@ export default function CategoriesAdmin() {
         <button className="btn btn-dark sm">Adicionar</button>
       </form>
       {msg && <p className={msg.ok ? 'ok' : 'err'}>{msg.t}</p>}
-      <div className="table-wrap">
+      <ResponsiveTable>
         <table>
           <thead><tr><th>Nome</th><th>Endereço</th><th></th></tr></thead>
           <tbody>
@@ -70,7 +71,7 @@ export default function CategoriesAdmin() {
             {list.length === 0 && <tr><td colSpan={3} className="muted">Nenhuma categoria.</td></tr>}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
     </>
   );
 }

@@ -1,4 +1,5 @@
 'use client';
+import ResponsiveTable from '@/components/ResponsiveTable';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -24,7 +25,7 @@ function BarChart({ data }: { data: { label: string; revenue: number }[] }) {
             <rect x={pad + i * bw + 4} y={H - h} width={bw - 8} height={h} rx="3" fill="var(--gold)">
               <title>{`${d.label}: ${brl(d.revenue)}`}</title>
             </rect>
-            <text x={pad + i * bw + bw / 2} y={H + 16} fontSize="10" textAnchor="middle" fill="var(--muted)">{d.label}</text>
+            {(data.length <= 14 || i % 3 === 0) && <text x={pad + i * bw + bw / 2} y={H + 16} fontSize="10" textAnchor="middle" fill="var(--muted)">{d.label}</text>}
           </g>
         );
       })}
@@ -36,6 +37,7 @@ export default function Dashboard() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [low, setLow] = useState<Product[]>([]);
   const [err, setErr] = useState('');
+  const [days, setDays] = useState(14);
 
   useEffect(() => {
     const sb = createClient();
@@ -49,7 +51,7 @@ export default function Dashboard() {
     });
   }, []);
 
-  const m = useMemo(() => (orders ? computeMetrics(orders) : null), [orders]);
+  const m = useMemo(() => (orders ? computeMetrics(orders, new Date(), days) : null), [orders, days]);
   if (err) return <p className="err">{err}</p>;
   if (!m || !orders) return <p className="muted">Carregando indicadores…</p>;
   const maxTop = Math.max(1, ...m.topProducts.map((p) => p.quantity));
@@ -70,7 +72,7 @@ export default function Dashboard() {
 
       <div className="panels">
         <section className="panel wide">
-          <h2>Faturamento — últimos 14 dias</h2>
+          <div className="row-between"><h2>Faturamento — últimos {days} dias</h2><select className="mini-select" value={days} onChange={(e) => setDays(Number(e.target.value))} aria-label="Período"><option value={7}>7 dias</option><option value={14}>14 dias</option><option value={30}>30 dias</option></select></div>
           <BarChart data={m.series} />
         </section>
         <section className="panel">
@@ -101,7 +103,7 @@ export default function Dashboard() {
         </section>
         <section className="panel wide">
           <h2>Pedidos recentes</h2>
-          <div className="table-wrap">
+          <ResponsiveTable>
             <table>
               <thead><tr><th>#</th><th>Data</th><th>Cliente</th><th>Status</th><th className="r">Total</th></tr></thead>
               <tbody>
@@ -117,7 +119,7 @@ export default function Dashboard() {
                 {orders.length === 0 && <tr><td colSpan={5} className="muted">Nenhum pedido ainda.</td></tr>}
               </tbody>
             </table>
-          </div>
+      </ResponsiveTable>
         </section>
       </div>
     </>

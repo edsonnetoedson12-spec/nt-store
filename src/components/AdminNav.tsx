@@ -15,6 +15,13 @@ const LINKS = [
   { href: '/admin/configuracoes', label: 'Configurações' },
 ];
 
+const TABS = [
+  { href: '/admin', label: 'Início', icon: '▦' },
+  { href: '/admin/produtos', label: 'Produtos', icon: '◫' },
+  { href: '/admin/pedidos', label: 'Pedidos', icon: '✉' },
+  { href: '/admin/clientes', label: 'Clientes', icon: '☺' },
+];
+
 export default function AdminNav({ email }: { email: string }) {
   const path = usePathname();
   const router = useRouter();
@@ -42,6 +49,17 @@ export default function AdminNav({ email }: { email: string }) {
         <small>{email}</small>
         <button onClick={logout}>Sair</button>
       </div>
+      <nav className="admin-tabs" aria-label="Atalhos">
+        {TABS.map((t) => (
+          <Link key={t.href} href={t.href} className={path === t.href || (t.href !== '/admin' && path.startsWith(t.href)) ? 'on' : ''} onClick={() => setOpen(false)}>
+            <span aria-hidden="true">{t.icon}</span>
+            {t.label}
+          </Link>
+        ))}
+        <button type="button" className={open ? 'on' : ''} onClick={() => setOpen((o) => !o)}>
+          <span aria-hidden="true">☰</span>Mais
+        </button>
+      </nav>
     </aside>
   );
 }

@@ -1,4 +1,5 @@
 'use client';
+import ResponsiveTable from '@/components/ResponsiveTable';
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { refreshStore } from '@/lib/admin';
@@ -43,7 +44,7 @@ export default function TestimonialsAdmin() {
         {err && <p className="err">{err}</p>}
         <button className="btn btn-dark sm">Adicionar depoimento</button>
       </form>
-      <div className="table-wrap">
+      <ResponsiveTable>
         <table>
           <thead><tr><th>Cliente</th><th>Texto</th><th>Nota</th><th>Visível</th><th></th></tr></thead>
           <tbody>
@@ -57,7 +58,7 @@ export default function TestimonialsAdmin() {
             {list.length === 0 && <tr><td colSpan={5} className="muted">Nenhum depoimento.</td></tr>}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
     </>
   );
 }

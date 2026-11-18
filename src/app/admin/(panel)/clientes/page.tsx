@@ -1,4 +1,5 @@
 'use client';
+import ResponsiveTable from '@/components/ResponsiveTable';
 import { Fragment, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { brl, dateBR, formatPhone, STATUS_LABEL, whatsappNumber } from '@/lib/format';
@@ -36,14 +37,14 @@ export default function CustomersAdmin() {
       </div>
       {err && <p className="err">{err}</p>}
       <p className="muted">Clientes são cadastrados automaticamente a cada compra.</p>
-      <div className="table-wrap">
+      <ResponsiveTable>
         <table>
           <thead><tr><th>Nome</th><th>Telefone</th><th className="r">Pedidos</th><th className="r">Total gasto</th><th>Último pedido</th><th></th></tr></thead>
           <tbody>
             {view.map(({ r, s }) => (
               <Fragment key={r.id}>
                 <tr>
-                  <td><strong>{r.name}</strong> {s.recurring && <span className="pill s-pago">Recorrente</span>}<br /><small className="muted">{r.email}</small></td>
+                  <td><div className="cell-stack"><span><strong>{r.name}</strong> {s.recurring && <span className="pill s-pago">Recorrente</span>}</span><small className="muted">{r.email}</small></div></td>
                   <td><a className="link" target="_blank" rel="noopener noreferrer" href={`https://wa.me/${whatsappNumber(r.phone)}`}>{formatPhone(r.phone)}</a></td>
                   <td className="r">{s.orders}</td>
                   <td className="r">{brl(s.spent)}</td>
@@ -66,7 +67,7 @@ export default function CustomersAdmin() {
             {view.length === 0 && <tr><td colSpan={6} className="muted">Nenhum cliente.</td></tr>}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
     </>
   );
 }

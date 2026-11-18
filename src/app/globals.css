@@ -230,3 +230,41 @@ html, body { overflow-x: hidden; -webkit-text-size-adjust: 100%; }
   .cart-info .link { padding: 10px 0; min-height: 40px; }
 }
 @media (max-width: 380px) { .grid, .grid.g3 { gap: 8px; } .card-title { font-size: 16px; } .hero h1 { font-size: 30px; } }
+
+/* ===== Painel: celular ===== */
+.mini-select { width: auto; padding: 6px 10px; font-size: 13px; margin: 0; }
+.admin-tabs { display: none; }
+@media (max-width: 800px) {
+  .admin { padding-bottom: 68px; }
+  .admin-side { position: sticky; top: 0; z-index: 60; padding: 10px 14px; }
+  .admin-side .admin-tabs { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 80; background: var(--dark); border-top: 1px solid #3a332d; padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); gap: 2px; }
+  .admin-tabs a, .admin-tabs button { display: grid; justify-items: center; align-content: center; gap: 2px; padding: 6px 2px; border: 0; background: none; color: #bfb3a3; font-size: 11px; border-radius: 8px; min-height: 52px; }
+  .admin-tabs span { font-size: 18px; line-height: 1; } .admin-tabs .on { color: #fff; background: #342d27; }
+  .admin-side.open { position: fixed; inset: 0; overflow-y: auto; padding-bottom: 90px; }
+  .admin-side.open nav:not(.admin-tabs) { display: grid; margin-top: 18px; } .admin-side.open nav:not(.admin-tabs) a { font-size: 17px; padding: 14px 12px; } .admin-side.open .admin-user { display: grid; margin-top: 18px; }
+  .admin-brand { margin-bottom: 0; } .admin-toggle { display: none; }
+
+  /* tabelas viram cartões */
+  .table-wrap.cards { background: none; border: 0; overflow: visible; }
+  .cards table { display: block; min-width: 0; } .cards thead { display: none; } .cards tbody { display: grid; gap: 12px; }
+  .cards tr { display: block; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 4px 14px; }
+  .cards td { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px dashed #efe8dd; text-align: right; }
+  .cards td:last-child { border-bottom: 0; }
+  .cards td[data-label]::before { content: attr(data-label); flex: none; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); text-align: left; }
+  .cards td[data-label=""]::before { display: none; } .cards td[data-label=""] { justify-content: flex-start; }
+  .cards td[colspan] { display: block; text-align: left; border: 0; }
+  .cards tr.detail { background: #fcfaf7; }
+  .cards td.nowrap { flex-wrap: wrap; justify-content: flex-end; gap: 6px 16px; } .cards td .link { padding: 8px 0; min-height: 40px; }
+  .cards .pill-select { width: auto; min-height: 40px; }
+  .cards .stock button { width: 36px; height: 36px; font-size: 18px; }
+  .cards .thumb { width: 56px; height: 56px; }
+  .admin-main .chips { flex-wrap: nowrap; overflow-x: auto; margin-inline: -14px; padding: 0 14px 4px; scrollbar-width: none; } .admin-main .chips::-webkit-scrollbar { display: none; } .admin-main .chip { flex: none; white-space: nowrap; min-height: 40px; }
+  .modal-card .adm-head { position: sticky; top: 0; background: #fff; z-index: 2; padding: 8px 0; margin: 0; }
+  .modal-card .adm-actions.end { position: sticky; bottom: 0; background: #fff; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); margin-top: 8px; }
+  .modal-card .adm-actions.end .btn { min-height: 48px; }
+  .settings .adm-head { position: sticky; top: 56px; z-index: 5; background: #f6f3ee; padding: 8px 0; }
+  .img-item, .img-add { width: 84px; height: 84px; } .img-item button { width: 28px; height: 28px; }
+}
+
+.cell-stack { display: grid; gap: 2px; }
+@media (max-width: 800px) { .cards .cell-stack { justify-items: end; text-align: right; } .cards td .cell-stack small { word-break: break-all; } }

@@ -1,4 +1,5 @@
 'use client';
+import ResponsiveTable from '@/components/ResponsiveTable';
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { refreshStore } from '@/lib/admin';
@@ -32,12 +33,28 @@ export default function OrdersAdmin() {
     await load();
   }
 
+  function exportCsv() {
+    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const rows = [['Pedido', 'Data', 'Cliente', 'Telefone', 'Pagamento', 'Status', 'Subtotal', 'Desconto', 'Frete', 'Total', 'Itens']].concat(
+      shown.map((o) => [String(o.number), dateBR(o.created_at), o.customers?.name ?? '', o.customers?.phone ?? '', PAYMENT_LABEL[o.payment_method], STATUS_LABEL[o.status], String(o.subtotal), String(o.discount), String(o.shipping), String(o.total), (o.order_items ?? []).map((i) => `${i.quantity}x ${i.name}`).join(' | ')]),
+    );
+    const blob = new Blob(['\ufeff' + rows.map((r) => r.map(esc).join(';')).join('\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `pedidos-nt-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   const shown = orders.filter((o) => !filter || o.status === filter);
   const count = (s: OrderStatus) => orders.filter((o) => o.status === s).length;
 
   return (
     <>
-      <h1 className="adm-title">Pedidos</h1>
+      <div className="adm-head">
+        <h1 className="adm-title">Pedidos</h1>
+        <button className="btn btn-light sm" onClick={exportCsv} disabled={shown.length === 0}>Baixar planilha (CSV)</button>
+      </div>
       <div className="chips">
         <button className={!filter ? 'chip on' : 'chip'} onClick={() => setFilter('')}>Todos ({orders.length})</button>
         {STATUS_ORDER.map((s) => (
@@ -45,7 +62,7 @@ export default function OrdersAdmin() {
         ))}
       </div>
       {msg && <p className="err">{msg}</p>}
-      <div className="table-wrap">
+      <ResponsiveTable>
         <table>
           <thead><tr><th>#</th><th>Data</th><th>Cliente</th><th>Pagamento</th><th className="r">Total</th><th>Status</th><th></th></tr></thead>
           <tbody>
@@ -99,7 +116,7 @@ export default function OrdersAdmin() {
             {shown.length === 0 && <tr><td colSpan={7} className="muted">Nenhum pedido.</td></tr>}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
     </>
   );
 }

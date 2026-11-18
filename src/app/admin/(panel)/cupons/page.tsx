@@ -1,4 +1,5 @@
 'use client';
+import ResponsiveTable from '@/components/ResponsiveTable';
 import { useCallback, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { num } from '@/lib/admin';
@@ -54,7 +55,7 @@ export default function CouponsAdmin() {
         {msg && <p className={msg.ok ? 'ok' : 'err'}>{msg.t}</p>}
         <button className="btn btn-dark sm">Criar cupom</button>
       </form>
-      <div className="table-wrap">
+      <ResponsiveTable>
         <table>
           <thead><tr><th>Código</th><th>Desconto</th><th className="r">Mínimo</th><th className="r">Usos</th><th>Validade</th><th>Ativo</th><th></th></tr></thead>
           <tbody>
@@ -72,7 +73,7 @@ export default function CouponsAdmin() {
             {list.length === 0 && <tr><td colSpan={7} className="muted">Nenhum cupom.</td></tr>}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
     </>
   );
 }
