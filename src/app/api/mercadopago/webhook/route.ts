@@ -24,8 +24,18 @@ export async function POST(req: Request) {
   if (!orderId) return NextResponse.json({ ok: true });
 
   const sb = createServiceClient();
+  const { data: order } = await sb.from('orders').select('id,total,status').eq('id', orderId).maybeSingle();
+  if (!order) return NextResponse.json({ ok: true });
   if (pay.status === 'approved') {
-    await sb.from('orders').update({ status: 'pago', mp_payment_id: String(id) }).eq('id', orderId).eq('status', 'aguardando_pagamento');
+    // Integridade: só marca como pago se o valor aprovado cobre o total do pedido.
+    const paid = Number(pay.transaction_amount ?? 0);
+    if (paid + 0.009 < Number(order.total)) {
+      console.error('Pagamento com valor diferente do pedido', { orderId, paid, total: order.total });
+      await sb.from('orders').update({ mp_payment_id: String(id), notes: 'ATENÇÃO: pagamento aprovado com valor diferente do total. Conferir no Mercado Pago.' }).eq('id', orderId);
+      return NextResponse.json({ ok: true });
+    }
+    const fee = Array.isArray(pay.fee_details) ? pay.fee_details.reduce((s: number, f: { amount?: number }) => s + Number(f.amount || 0), 0) : 0;
+    await sb.from('orders').update({ status: 'pago', mp_payment_id: String(id), payment_fee: Math.round(fee * 100) / 100 }).eq('id', orderId).eq('status', 'aguardando_pagamento');
   } else if (pay.status === 'cancelled' || pay.status === 'rejected') {
     await sb.from('orders').update({ mp_payment_id: String(id) }).eq('id', orderId);
   }

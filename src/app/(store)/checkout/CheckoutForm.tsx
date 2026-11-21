@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useCart } from '@/components/CartProvider';
 import { brl, onlyDigits, PAYMENT_LABEL } from '@/lib/format';
 import { orderTotals, type ShippingRule } from '@/lib/pricing';
@@ -14,6 +14,8 @@ export default function CheckoutForm({ shipping, payments }: { shipping: Shippin
   const methods = (Object.keys(PAYMENT_LABEL) as Method[]).filter((m) => payments[m]);
   const [method, setMethod] = useState<Method>(methods[0] ?? 'whatsapp');
   const [f, setF] = useState({ name: '', phone: '', email: '', cep: '', street: '', number: '', complement: '', district: '', city: '', state: '', notes: '' });
+  // Mesma chave em cliques repetidos: o banco devolve o pedido já criado em vez de duplicar.
+  const idemKey = useRef(typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : '');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setF((p) => ({ ...p, [k]: e.target.value }));
@@ -42,11 +44,12 @@ export default function CheckoutForm({ shipping, payments }: { shipping: Shippin
         body: JSON.stringify({
           customer: { name: f.name, phone: f.phone, email: f.email },
           address: delivery === 'entrega' ? { cep: f.cep, street: f.street, number: f.number, complement: f.complement, district: f.district, city: f.city, state: f.state } : {},
-          items: items.map((i) => ({ product_id: i.id, quantity: i.quantity })),
+          items: items.map((i) => ({ product_id: i.product_id ?? i.id, variant_id: i.variant_id, quantity: i.quantity })),
           coupon: coupon?.code ?? '',
           payment_method: method,
           delivery,
           notes: f.notes,
+          idempotency_key: idemKey.current,
         }),
       });
       const data = await res.json();

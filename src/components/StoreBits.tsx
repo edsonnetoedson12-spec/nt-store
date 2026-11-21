@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useCart } from './CartProvider';
-import type { Banner, Product } from '@/lib/types';
+import type { Banner, Product, Variant } from '@/lib/types';
 import { whatsappNumber } from '@/lib/format';
 
 export function CartButton() {
@@ -87,28 +87,53 @@ export function HeroSlider({ banners, title, subtitle, cta }: { banners: Banner[
   );
 }
 
-export function AddToCart({ product, big = false }: { product: Product; big?: boolean }) {
+export function AddToCart({ product, big = false, variants = [] }: { product: Product; big?: boolean; variants?: Variant[] }) {
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const [done, setDone] = useState(false);
+  const [vid, setVid] = useState('');
   const price = product.promo_price != null && product.promo_price < product.price ? product.promo_price : product.price;
-  const out = product.stock <= 0;
+  const hasVar = !!product.has_variants;
+  const variant = variants.find((v) => v.id === vid);
+  const stock = hasVar ? (variant?.stock ?? 0) : product.stock;
+  const out = hasVar ? product.stock <= 0 : product.stock <= 0;
+  // Na listagem, produto com variações leva à página do produto para escolher a opção.
+  if (hasVar && !big)
+    return (
+      <div className="atc">
+        <Link className="btn btn-dark" href={`/produto/${product.slug}`}>{out ? 'Esgotado' : 'Escolher opção'}</Link>
+      </div>
+    );
   const go = () => {
-    add({ id: product.id, slug: product.slug, name: product.name, image: product.images[0] || '', price, stock: product.stock }, qty);
+    if (hasVar && !variant) return;
+    add(
+      hasVar && variant
+        ? { id: `${product.id}:${variant.id}`, product_id: product.id, variant_id: variant.id, variant_name: variant.name, slug: product.slug, name: product.name, image: product.images[0] || '', price, stock: variant.stock }
+        : { id: product.id, slug: product.slug, name: product.name, image: product.images[0] || '', price, stock: product.stock },
+      qty,
+    );
     setDone(true);
     setTimeout(() => setDone(false), 1800);
   };
   return (
     <div className={big ? 'atc big' : 'atc'}>
+      {hasVar && (
+        <select className="variant-select" value={vid} onChange={(e) => { setVid(e.target.value); setQty(1); }} aria-label="Escolha a opção">
+          <option value="">Escolha a opção…</option>
+          {variants.map((v) => (
+            <option key={v.id} value={v.id} disabled={v.stock <= 0}>{v.name}{v.stock <= 0 ? ' (esgotado)' : ''}</option>
+          ))}
+        </select>
+      )}
       {big && !out && (
         <div className="qty" aria-label="Quantidade">
-          <button onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="Diminuir">−</button>
+          <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="Diminuir">−</button>
           <span>{qty}</span>
-          <button onClick={() => setQty((q) => Math.min(product.stock, q + 1))} aria-label="Aumentar">+</button>
+          <button type="button" onClick={() => setQty((q) => Math.min(Math.max(stock, 1), q + 1))} aria-label="Aumentar">+</button>
         </div>
       )}
-      <button className="btn btn-dark" disabled={out} onClick={go}>
-        {out ? 'Esgotado' : done ? 'Adicionado ✓' : 'Adicionar ao carrinho'}
+      <button className="btn btn-dark" disabled={out || (hasVar && !variant)} onClick={go}>
+        {out ? 'Esgotado' : hasVar && !variant ? 'Escolha uma opção' : done ? 'Adicionado ✓' : 'Adicionar ao carrinho'}
       </button>
     </div>
   );

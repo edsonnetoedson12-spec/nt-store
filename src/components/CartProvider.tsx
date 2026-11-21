@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { clampQty } from '@/lib/pricing';
 
-export type CartItem = { id: string; slug: string; name: string; image: string; price: number; quantity: number; stock: number };
+export type CartItem = { id: string; slug: string; name: string; image: string; price: number; quantity: number; stock: number; product_id?: string; variant_id?: string; variant_name?: string };
 export type AppliedCoupon = { code: string; discount: number } | null;
 
 type Ctx = {

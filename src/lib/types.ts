@@ -16,7 +16,13 @@ export type Product = {
   active: boolean;
   sold_count: number;
   created_at: string;
+  sku?: string | null;
+  brand?: string | null;
+  min_stock?: number;
+  has_variants?: boolean;
 };
+
+export type Variant = { id: string; product_id: string; name: string; sku: string | null; stock: number; active: boolean; sort: number };
 
 export type OrderStatus =
   | 'aguardando_pagamento'
@@ -35,6 +41,9 @@ export type OrderItem = {
   price: number;
   cost: number;
   quantity: number;
+  variant_id?: string | null;
+  variant_name?: string | null;
+  sku?: string | null;
 };
 
 export type Order = {
@@ -53,6 +62,8 @@ export type Order = {
   notes: string | null;
   tracking_code: string | null;
   created_at: string;
+  payment_fee?: number;
+  paid_at?: string | null;
   order_items?: OrderItem[];
   customers?: Customer | null;
 };

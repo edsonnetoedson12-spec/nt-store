@@ -50,7 +50,7 @@ export default function CartView({ shipping }: { shipping: ShippingRule }) {
             <div className="cart-row" key={i.id}>
               <img src={i.image || '/placeholders/produto.svg'} alt={i.name} />
               <div className="cart-info">
-                <Link href={`/produto/${i.slug}`}>{i.name}</Link>
+                <Link href={`/produto/${i.slug}`}>{i.name}</Link>{i.variant_name && <small className="muted" style={{ display: 'block' }}>{i.variant_name}</small>}
                 <span className="muted">{brl(i.price)} cada</span>
                 <button className="link danger" onClick={() => remove(i.id)}>
                   Remover

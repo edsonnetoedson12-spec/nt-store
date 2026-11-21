@@ -5,16 +5,30 @@ import { SITE_URL } from '@/lib/data';
 type Body = {
   customer?: { name?: string; phone?: string; email?: string };
   address?: Record<string, string>;
-  items?: { product_id?: string; quantity?: number }[];
+  items?: { product_id?: string; variant_id?: string; quantity?: number }[];
+  idempotency_key?: string;
   coupon?: string;
   payment_method?: string;
   delivery?: string;
   notes?: string;
 };
 
+// Limite simples por IP (best-effort: cada instância serverless tem sua memória). O banco já impede estoque negativo.
+const hits = new Map<string, number[]>();
+function limited(ip: string) {
+  const now = Date.now();
+  const list = (hits.get(ip) ?? []).filter((t) => now - t < 60_000);
+  list.push(now);
+  hits.set(ip, list);
+  if (hits.size > 5000) hits.clear();
+  return list.length > 8;
+}
+
 const str = (v: unknown, max = 200) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 
 export async function POST(req: Request) {
+  const ip = (req.headers.get('x-forwarded-for') || 'x').split(',')[0].trim();
+  if (limited(ip)) return NextResponse.json({ error: 'Muitas tentativas. Aguarde um minuto e tente novamente.' }, { status: 429 });
   let body: Body;
   try {
     body = await req.json();
@@ -29,11 +43,12 @@ export async function POST(req: Request) {
   const payload = {
     customer: { name: str(body.customer?.name, 120), phone: str(body.customer?.phone, 30), email: str(body.customer?.email, 160) },
     address,
-    items: (Array.isArray(body.items) ? body.items.slice(0, 50) : []).map((i) => ({ product_id: str(i.product_id, 40), quantity: Number(i.quantity) || 0 })),
+    items: (Array.isArray(body.items) ? body.items.slice(0, 50) : []).map((i) => ({ product_id: str(i.product_id, 40), variant_id: str(i.variant_id, 40) || null, quantity: Number(i.quantity) || 0 })),
     coupon: str(body.coupon, 40),
     payment_method: str(body.payment_method, 20),
     delivery: str(body.delivery, 20),
     notes: str(body.notes, 500),
+    idempotency_key: str(body.idempotency_key, 40) || null,
   };
 
   const sb = createPublicClient();
@@ -43,12 +58,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: msg }, { status: 400 });
   }
 
-  const order = data as { order_id: string; number: number; total: number };
+  const order = data as { order_id: string; number: number; total: number; duplicate?: boolean };
   const result: { number: number; redirect: string } = { number: order.number, redirect: `/pedido?n=${order.number}&t=${order.total}` };
 
   // Mercado Pago (Checkout Pro): PIX e cartão. Se não houver token, o pedido fica "aguardando pagamento".
   const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
-  if (token && (payload.payment_method === 'pix' || payload.payment_method === 'cartao')) {
+  if (token && !order.duplicate && (payload.payment_method === 'pix' || payload.payment_method === 'cartao')) {
     try {
       const excluded =
         payload.payment_method === 'pix'

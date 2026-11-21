@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getCategories, getProduct, getSettings, listProducts, SITE_URL } from '@/lib/data';
+import { getCategories, getProduct, getVariants, getSettings, listProducts, SITE_URL } from '@/lib/data';
 import { AddToCart, ProductGallery } from '@/components/StoreBits';
 import { ProductCard, Section } from '@/components/Layout';
 import { brl } from '@/lib/format';
@@ -27,6 +27,7 @@ export default async function ProductPage({ params }: { params: Params }) {
   const { slug } = await params;
   const [p, cats, s] = await Promise.all([getProduct(slug), getCategories(), getSettings()]);
   if (!p) notFound();
+  const variants = p.has_variants ? await getVariants(p.id) : [];
   const cat = cats.find((c) => c.id === p.category_id);
   const related = (await listProducts({ category: cat?.slug, limit: 5 })).filter((x) => x.id !== p.id).slice(0, 4);
   const promo = hasPromo(p);
@@ -37,7 +38,8 @@ export default async function ProductPage({ params }: { params: Params }) {
     name: p.name,
     description: p.description || p.name,
     image: p.images.map(abs),
-    brand: { '@type': 'Brand', name: s.name },
+    brand: { '@type': 'Brand', name: p.brand || s.name },
+    ...(p.sku ? { sku: p.sku } : {}),
     offers: {
       '@type': 'Offer',
       priceCurrency: 'BRL',
@@ -73,7 +75,7 @@ export default async function ProductPage({ params }: { params: Params }) {
             <p className="muted">
               {p.stock > 0 ? (p.stock <= 5 ? `Últimas ${p.stock} unidades em estoque` : 'Em estoque — envio rápido') : 'Produto esgotado'}
             </p>
-            <AddToCart product={p} big />
+            <AddToCart product={p} big variants={variants} />
             <div className="desc">
               <h2>Descrição</h2>
               <p>{p.description || 'Sem descrição.'}</p>

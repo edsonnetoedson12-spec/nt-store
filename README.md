@@ -51,3 +51,8 @@ Suba o projeto na [Vercel](https://vercel.com) (importando o repositório), cada
 - A vitrine é atualizada na hora quando você salva no painel (e, no máximo, a cada 30 s por cache).
 - As imagens em `public/placeholders` são exemplos; substitua pelas suas fotos no painel.
 - Sugestões para crescer: cálculo de frete por CEP (Correios/Melhor Envio), e-mails transacionais, variações de produto (tamanho/cor).
+
+
+## Melhorias v2 (migração 003)
+Rode `supabase/migrations/003_melhorias.sql` no SQL Editor (faz backup `bkp_*` das tabelas antes; é aditiva e pode rodar mais de uma vez). Depois, opcionalmente, `supabase/tests/smoke.sql` e `smoke_003.sql` (desfazem tudo no final).
+Novidades: SKU/marca/estoque mínimo/variações, importar e exportar CSV (Excel), página Estoque (com histórico), página Financeiro (despesas, taxas, lucro bruto/líquido, relatórios por período), histórico de status dos pedidos, anti-pedido-duplicado, cliente único por e-mail/telefone com união de duplicados, validação do valor pago no webhook e backup JSON em Configurações.

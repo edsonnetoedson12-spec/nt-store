@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { num, refreshStore, uploadImage } from '@/lib/admin';
+import { download, num, refreshStore, uploadImage } from '@/lib/admin';
 import { DEFAULT_SETTINGS } from '@/lib/data-defaults';
 import type { Banner, StoreSettings } from '@/lib/types';
 
@@ -12,8 +12,24 @@ export default function SettingsAdmin() {
   const [free, setFree] = useState('0');
   const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [adm, setAdm] = useState({ pix: '0', cartao: '0', stale: '0' });
+  const loadAdm = () => sb.from('settings').select('value').eq('key', 'admin').maybeSingle().then(({ data }) => {
+    const v = (data?.value ?? {}) as { fees?: { pix?: number; cartao?: number }; stale_hours?: number };
+    setAdm({ pix: String(v.fees?.pix ?? 0), cartao: String(v.fees?.cartao ?? 0), stale: String(v.stale_hours ?? 0) });
+  });
+  async function saveAdm() {
+    const { error } = await sb.from('settings').upsert({ key: 'admin', value: { fees: { pix: num(adm.pix), cartao: num(adm.cartao) }, stale_hours: Math.max(0, Math.floor(num(adm.stale))) }, updated_at: new Date().toISOString() });
+    setMsg({ ok: !error, t: error ? error.message : 'Taxas e prazos salvos.' });
+  }
+  async function backup() {
+    const tables = ['categories', 'products', 'product_variants', 'customers', 'orders', 'order_items', 'coupons', 'expenses', 'settings', 'testimonials'];
+    const out: Record<string, unknown> = { gerado_em: new Date().toISOString() };
+    for (const t of tables) { const { data } = await sb.from(t).select('*'); out[t] = data ?? []; }
+    download(`backup-nt-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(out, null, 1), 'application/json');
+  }
 
   useEffect(() => {
+    loadAdm();
     sb.from('settings').select('value').eq('key', 'store').maybeSingle().then(({ data }) => {
       const v = (data?.value ?? {}) as Partial<StoreSettings>;
       const merged: StoreSettings = {
@@ -162,6 +178,19 @@ export default function SettingsAdmin() {
           <label><input type="checkbox" checked={s.payments.whatsapp} onChange={(e) => up('payments', { ...s.payments, whatsapp: e.target.checked })} /> Combinar pelo WhatsApp</label>
         </div>
         <small className="muted">Cupons: menu “Cupons”. O valor do frete e as regras são sempre conferidos no servidor.</small>
+      </fieldset>
+      <fieldset className="box">
+        <legend>Financeiro e segurança dos dados</legend>
+        <div className="three">
+          <label>Taxa PIX estimada (%)<input inputMode="decimal" value={adm.pix} onChange={(e) => setAdm({ ...adm, pix: e.target.value })} /></label>
+          <label>Taxa cartão estimada (%)<input inputMode="decimal" value={adm.cartao} onChange={(e) => setAdm({ ...adm, cartao: e.target.value })} /></label>
+          <label>Cancelar PIX/cartão não pago após (horas, 0 = nunca)<input type="number" min={0} value={adm.stale} onChange={(e) => setAdm({ ...adm, stale: e.target.value })} /></label>
+        </div>
+        <p className="muted small">A taxa estimada só é usada quando o Mercado Pago não informou a taxa real. Pedidos vencidos são cancelados (e o estoque devolvido) quando chega um novo pedido.</p>
+        <div className="adm-actions">
+          <button type="button" className="btn btn-light sm" onClick={saveAdm}>Salvar taxas e prazos</button>
+          <button type="button" className="btn btn-light sm" onClick={backup}>Baixar backup completo (JSON)</button>
+        </div>
       </fieldset>
     </form>
   );

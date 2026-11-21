@@ -277,3 +277,20 @@ html, body { overflow-x: hidden; -webkit-text-size-adjust: 100%; }
   /* backdrop-filter faz o menu (position: fixed) ficar preso ao cabeçalho */
   .header { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--bg); }
 }
+
+/* ---- variações de produto ---- */
+.variant-select{width:100%;padding:12px 14px;border:1px solid var(--line,#d9cfbd);border-radius:10px;background:var(--paper,#fff);color:inherit;font:inherit;margin-bottom:10px}
+.atc.big{flex-wrap:wrap}
+.atc .variant-select{flex:1 1 100%}
+
+/* ---- admin: variações, margem, importação ---- */
+.variants-box{border:1px solid var(--line,#ddd);border-radius:12px;padding:12px}
+.variant-row{display:grid;grid-template-columns:2fr 1.2fr 80px auto auto auto;gap:8px;align-items:center;margin:8px 0}
+.variant-row input[type=text],.variant-row input:not([type]),.variant-row input[type=number]{width:100%;min-width:0}
+.margin-hint{font-size:.85rem}.margin-hint.bad{color:#b3261e}.margin-hint.good{color:#2e7d32}
+.import-box{border:1px dashed var(--gold,#b8964d);border-radius:12px;padding:12px;margin:12px 0}
+.import-box ul{margin:6px 0;padding-left:18px;font-size:.85rem}
+@media(max-width:700px){.variant-row{grid-template-columns:1fr 1fr;}.variant-row input:first-child{grid-column:1/-1}}
+.expense-form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin:10px 0}
+.expense-form input,.expense-form select{min-width:0;width:100%}
+@media(max-width:800px){.expense-form{grid-template-columns:1fr 1fr}.expense-form input:first-child{grid-column:1/-1}}

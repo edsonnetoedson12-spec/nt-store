@@ -7,9 +7,11 @@ import { createClient } from '@/lib/supabase/client';
 const LINKS = [
   { href: '/admin', label: 'Visão geral' },
   { href: '/admin/produtos', label: 'Produtos' },
+  { href: '/admin/estoque', label: 'Estoque' },
   { href: '/admin/categorias', label: 'Categorias' },
   { href: '/admin/pedidos', label: 'Pedidos' },
   { href: '/admin/clientes', label: 'Clientes' },
+  { href: '/admin/financeiro', label: 'Financeiro' },
   { href: '/admin/cupons', label: 'Cupons' },
   { href: '/admin/depoimentos', label: 'Depoimentos' },
   { href: '/admin/configuracoes', label: 'Configurações' },

@@ -1,5 +1,5 @@
 import { createPublicClient } from './supabase/server';
-import type { Category, Product, StoreSettings, Testimonial } from './types';
+import type { Category, Product, StoreSettings, Testimonial, Variant } from './types';
 import { DEFAULT_SETTINGS } from './data-defaults';
 
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, '');
@@ -90,4 +90,14 @@ export async function getTestimonials(): Promise<Testimonial[]> {
   if (!configured()) return [];
   const { data } = await createPublicClient().from('testimonials').select('*').eq('active', true).order('created_at', { ascending: false }).limit(6);
   return (data ?? []) as Testimonial[];
+}
+
+export async function getVariants(productId: string): Promise<Variant[]> {
+  if (!configured()) return [];
+  try {
+    const { data } = await createPublicClient().from('product_variants').select('*').eq('product_id', productId).eq('active', true).order('sort').order('name');
+    return (data ?? []) as Variant[];
+  } catch {
+    return []; // migração 003 ainda não aplicada
+  }
 }

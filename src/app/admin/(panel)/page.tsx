@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { computeMetrics } from '@/lib/metrics';
+import { buildReport, type Expense } from '@/lib/finance';
 import { brl, dateBR, STATUS_LABEL, STATUS_ORDER } from '@/lib/format';
 import type { Order, Product } from '@/lib/types';
 
@@ -36,6 +37,7 @@ function BarChart({ data }: { data: { label: string; revenue: number }[] }) {
 export default function Dashboard() {
   const [orders, setOrders] = useState<Order[] | null>(null);
   const [low, setLow] = useState<Product[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [err, setErr] = useState('');
   const [days, setDays] = useState(14);
 
@@ -43,31 +45,39 @@ export default function Dashboard() {
     const sb = createClient();
     Promise.all([
       sb.from('orders').select('*, order_items(*), customers(*)').order('created_at', { ascending: false }).limit(2000),
-      sb.from('products').select('*').lte('stock', 5).eq('active', true).order('stock').limit(10),
-    ]).then(([o, p]) => {
+      sb.from('products').select('*').eq('active', true).order('stock').limit(500),
+      sb.from('expenses').select('*').order('spent_on', { ascending: false }).limit(1000),
+    ]).then(([o, p, e]) => {
       if (o.error) return setErr(o.error.message);
       setOrders((o.data ?? []) as Order[]);
-      setLow((p.data ?? []) as Product[]);
+      setLow(((p.data ?? []) as Product[]).filter((x) => x.stock <= (x.min_stock ?? 5)).slice(0, 10));
+      setExpenses((e.data ?? []) as Expense[]); // vazio se a migração 003 ainda não foi aplicada
     });
   }, []);
 
   const m = useMemo(() => (orders ? computeMetrics(orders, new Date(), days) : null), [orders, days]);
+  const month = useMemo(() => {
+    const n = new Date();
+    return orders ? buildReport(orders, expenses, new Date(n.getFullYear(), n.getMonth(), 1), new Date(n.getFullYear(), n.getMonth() + 1, 1)) : null;
+  }, [orders, expenses]);
   if (err) return <p className="err">{err}</p>;
-  if (!m || !orders) return <p className="muted">Carregando indicadores…</p>;
+  if (!m || !orders || !month) return <p className="muted">Carregando indicadores…</p>;
   const maxTop = Math.max(1, ...m.topProducts.map((p) => p.quantity));
 
   return (
     <>
       <h1 className="adm-title">Visão geral</h1>
       <div className="stats">
-        <Stat label="Faturamento total" value={brl(m.revenue)} />
+        <Stat label="Faturamento recebido" value={brl(m.revenue)} />
         <Stat label="Vendas do dia" value={brl(m.today.revenue)} sub={`${m.today.orders} pedido(s)`} />
         <Stat label="Vendas da semana" value={brl(m.week.revenue)} sub={`${m.week.orders} pedido(s)`} />
         <Stat label="Vendas do mês" value={brl(m.month.revenue)} sub={`${m.month.orders} pedido(s)`} />
-        <Stat label="Lucro estimado" value={brl(m.profit)} sub="preço − custo − cupons" />
+        <Stat label="Lucro bruto (mês)" value={brl(month.grossProfit)} sub="produtos − custo − cupons" />
+        <Stat label="Lucro líquido (mês)" value={brl(month.netProfit)} sub={`− taxas ${brl(month.fees)} − despesas ${brl(month.expenses)}`} />
+        <Stat label="Lucro bruto (total)" value={brl(m.profit)} sub="desde o início" />
         <Stat label="Pedidos pagos" value={String(m.orderCount)} sub={`${m.totalOrders} no total`} />
         <Stat label="Ticket médio" value={brl(m.avgTicket)} />
-        <Stat label="Aguardando pagamento" value={String(m.statusCount.aguardando_pagamento ?? 0)} />
+        <Stat label="Aguardando pagamento" value={String(m.statusCount.aguardando_pagamento ?? 0)} sub={brl(month.pending.total) + ' no mês'} />
       </div>
 
       <div className="panels">
@@ -96,8 +106,8 @@ export default function Dashboard() {
           {low.length === 0 && <p className="muted">Tudo em dia.</p>}
           {low.map((p) => (
             <div className="row-between" key={p.id}>
-              <Link href="/admin/produtos" className="link">{p.name}</Link>
-              <strong className={p.stock === 0 ? 'err' : ''}>{p.stock} un.</strong>
+              <Link href="/admin/estoque" className="link">{p.name}</Link>
+              <strong className={p.stock === 0 ? 'err' : ''}>{p.stock} un. <small className="muted">(mín. {p.min_stock ?? 5})</small></strong>
             </div>
           ))}
         </section>
